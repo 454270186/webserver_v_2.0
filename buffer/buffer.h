@@ -17,6 +17,8 @@ public:
     size_t readable_size();
     size_t pre_size();
 
+    void retrieve_all();
+
     void check_for_write(size_t len);
     void has_writen(size_t len); // add write_pos_
     const char* peek(); // return the string started at first unread char

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <assert.h>
+#include <string.h>
 #include <sys/uio.h>
 #include "buffer.h"
 
@@ -110,4 +111,10 @@ ssize_t Buffer::Write_fd(int fd) {
     read_pos_ += len;
 
     return len;
+}
+
+void Buffer::retrieve_all() {
+    buffer_.clear();
+    read_pos_ = 0;
+    write_pos_ = 0;
 }

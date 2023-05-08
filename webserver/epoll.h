@@ -11,11 +11,14 @@ public:
     Epoll(int max_events = 2048);
     ~Epoll();
 
-    bool add_fd(int fd);
-    bool mod_fd(int fd);
+    bool add_fd(int fd, uint32_t event);
+    bool mod_fd(int fd, uint32_t event);
     bool remove_fd(int fd);
 
     int wait(int timeout); // epoll_wait()
+
+    int get_event_fd(size_t index);
+    uint32_t get_events(size_t index);
 
 private:
     int epoll_fd_{-1};
