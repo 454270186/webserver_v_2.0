@@ -1,8 +1,21 @@
 cmake_minimum_required(VERSION 3.0)
 project(WebServer)
 
-# Add excutable file
-add_executable(http_server main.cpp hello/hello.cpp)
-
 # Add inclue path
-target_include_directories(http_server PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(
+    ./buffer
+    ./http
+    ./threadpool
+    ./webserver
+)
+
+# Add source file
+file(GLOB SOURCES 
+    "./buffer/*.cpp"
+    "./http/*.cpp"
+    "./threadpool/*.cpp"
+    "./webserver/*.cpp"
+)
+
+# Add excutable file
+add_executable(http_server main.cpp ${SOURCES})
