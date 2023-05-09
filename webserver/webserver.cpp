@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <string.h>
+#include <functional>
 #include "webserver.h"
 #include "threadpool.h"
 
@@ -64,6 +65,16 @@ void WebServer::deal_listen() {
     socklen_t client_len = sizeof(client_addr);
     int cfd = accept(listen_fd_, (sockaddr*)&client_addr, &client_len);
     add_client(cfd, client_addr);
+}
+
+void WebServer::deal_read(HttpConn* client) {
+    printf("something to read\n");
+    //threadpool_->append(std::bind(&WebServer::web_read, this, client));
+}
+
+void WebServer::deal_write(HttpConn* client) {
+    printf("something to write\n");
+    //threadpool_->append(std::bind(&WebServer::web_write, this, client));
 }
 
 void WebServer::add_client(int fd, sockaddr_in addr) {

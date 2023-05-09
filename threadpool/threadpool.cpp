@@ -44,7 +44,8 @@ void Threadpool::worker() {
     }
 }
 
-bool Threadpool::append(std::function<void()> task) {
+template<class Func>
+bool Threadpool::append(Func&& task) {
     if (m_is_close.load()) {
         return false;
     }
@@ -55,7 +56,7 @@ bool Threadpool::append(std::function<void()> task) {
             return false;
         }
 
-        m_workque.emplace(std::move(task));
+        m_workque.emplace(std::forward<Func>(task));
     }
 
     m_cond.notify_one();

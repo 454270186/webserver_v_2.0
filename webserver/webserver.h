@@ -24,12 +24,12 @@ private:
     void add_client(int fd, sockaddr_in addr);
 
     void deal_listen();
-    void deal_read(HttpConn* client) {};
-    void deal_write(HttpConn* client) {};
+    void deal_read(HttpConn* client);
+    void deal_write(HttpConn* client);
 
-    void process(HttpConn* client);
-    void read(HttpConn* client);
-    void write(HttpConn* client);
+    void web_process(HttpConn* client) {};
+    void web_read(HttpConn* client) {};
+    void web_write(HttpConn* client) {};
 
     void close_conn(HttpConn* client) {};
 
