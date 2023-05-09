@@ -19,7 +19,6 @@ size_t Buffer::pre_size() {
 }
 
 void Buffer::check_for_write(size_t len) {
-    printf("%ld\n", writable_size());
     if (writable_size() < len) {
         make_space(len);
     }

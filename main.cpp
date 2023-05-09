@@ -1,12 +1,13 @@
 #include <iostream>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include "buffer.h"
+#include "webserver.h"
 using namespace std;
 
 int main() {
-    Buffer buf(10);
-    buf.append("qwertyuiopasdfghjkl");
-    buf.print_buf();
-    buf.retrieve_all();
-    buf.print_buf();
-    printf("%ld\n", buf.readable_size());
+    WebServer server(10);
+    server.run();
 }
