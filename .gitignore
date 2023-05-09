@@ -3,3 +3,6 @@ ip_addr.txt
 
 # cmake build
 build
+
+# vscode
+.vscode

@@ -36,7 +36,7 @@ private:
     int port_{8080};
     bool is_closed_{false};
     int listen_fd_{-1};
-    char* src_dir{0};
+    char* src_dir_{0};
 
     unique_ptr<Threadpool> threadpool_;
     unique_ptr<Epoll> epoller_;

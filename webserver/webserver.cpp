@@ -1,11 +1,18 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <assert.h>
+#include <string.h>
 #include "webserver.h"
 #include "threadpool.h"
 
 WebServer::WebServer(int thread_num) : threadpool_(new Threadpool(thread_num)), epoller_(new Epoll()) {
     listen_event_ = EPOLLIN;
+    conn_event_ = EPOLLONESHOT | EPOLLRDHUP;
+    src_dir_ = getcwd(NULL, 256);
+    strncat(src_dir_, "/static/", 20);
+
+    HttpConn::src_dir_ = src_dir_;
+    HttpConn::user_cnt_ = 0;
     if (!init_socket()) {
         is_closed_ = true;
     }
@@ -18,9 +25,9 @@ WebServer::~WebServer() {
 
 void WebServer::run() {
     if (!is_closed_) {
-        printf("----------------\n");
+        printf("--------------------------------\n");
         printf("Server is running on port %d\n", port_);
-        printf("----------------\n");
+        printf("--------------------------------\n");
     }
     
     while (!is_closed_) {
@@ -56,7 +63,16 @@ void WebServer::deal_listen() {
     sockaddr_in client_addr;
     socklen_t client_len = sizeof(client_addr);
     int cfd = accept(listen_fd_, (sockaddr*)&client_addr, &client_len);
-    printf("client %d connected\n", client_addr.sin_addr.s_addr);
+    add_client(cfd, client_addr);
+}
+
+void WebServer::add_client(int fd, sockaddr_in addr) {
+    assert(fd > 0);
+    users_[fd].init(fd, addr);
+    // add to epoller
+    epoller_->add_fd(fd, EPOLLIN | conn_event_);
+    set_fd_non_block(fd);
+    printf("client %d connected\n", addr.sin_addr.s_addr);
 }
 
 bool WebServer::init_socket() {
