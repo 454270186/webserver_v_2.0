@@ -2,6 +2,7 @@
 #define _HTTP_REQ
 #include <string>
 #include <unordered_map>
+#include "buffer.h"
 
 using std::string;
 using std::unordered_map;

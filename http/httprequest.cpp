@@ -46,7 +46,7 @@ bool HttpRequest::parse(Buffer& buffer) {
         }
         buffer.retrieve_until(new_line_end + 2);
     }
-    printf("[%s] [%s] [%s]\n", method_, url_, version_);
+    printf("[%s] [%s] [%s]\n", method_.c_str(), url_.c_str(), version_.c_str());
     return true;
 }
 

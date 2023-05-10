@@ -57,8 +57,10 @@ bool HttpConn::process() {
     if (read_buf_.readable_size() <= 0) {
         return false;
     } else if (req_.parse(read_buf_)) {
-        printf("");
+        printf("URL: %s\n", req_.get_url().c_str());
     } else {
         // 404 not found
+        printf("404 not found\n");
     }
+    return true;
 }
