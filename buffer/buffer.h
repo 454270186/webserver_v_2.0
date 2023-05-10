@@ -26,8 +26,8 @@ public:
     void append(const string& str); // accept for c++ string
     void append(const char* str, size_t len); // accept for c string
 
-    ssize_t Read_fd(int fd);
-    ssize_t Write_fd(int fd);
+    ssize_t Read_fd(int fd, int* err_no);
+    ssize_t Write_fd(int fd, int* err_no);
 
     void print_buf(); // for debug
     

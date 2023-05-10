@@ -18,8 +18,18 @@ public:
     void init(int fd, sockaddr_in addr);
     void close_conn();
 
+    ssize_t read(int* err_no);
+    ssize_t write(int* err_no);
+    
+    bool process() {return true; };
+
+    int get_fd() { return fd_; }
+
     static const char* src_dir_;
     static atomic<int> user_cnt_;
+    static bool is_ET_;
+
+    int num{100000}; // for debug
 private:
     int fd_;
     sockaddr_in addr_;

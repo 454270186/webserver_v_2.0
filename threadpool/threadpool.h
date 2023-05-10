@@ -13,8 +13,7 @@ public:
     Threadpool(int thread_number = 8, int max_requests = 10);
     ~Threadpool();
 
-    template<class Func>
-    bool append(Func&& task);
+    bool append(std::function<void()> task);
 
 private:
     void worker();

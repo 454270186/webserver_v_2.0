@@ -8,15 +8,17 @@
 
 WebServer::WebServer(int thread_num) : threadpool_(new Threadpool(thread_num)), epoller_(new Epoll()) {
     listen_event_ = EPOLLIN;
-    conn_event_ = EPOLLONESHOT | EPOLLRDHUP;
+    conn_event_ = EPOLLONESHOT | EPOLLRDHUP | EPOLLET;
     src_dir_ = getcwd(NULL, 256);
     strncat(src_dir_, "/static/", 20);
 
     HttpConn::src_dir_ = src_dir_;
     HttpConn::user_cnt_ = 0;
+    HttpConn::is_ET_ = true;
     if (!init_socket()) {
         is_closed_ = true;
     }
+    is_closed_ = false;
 }
 
 WebServer::~WebServer() {
@@ -69,12 +71,38 @@ void WebServer::deal_listen() {
 
 void WebServer::deal_read(HttpConn* client) {
     printf("something to read\n");
-    //threadpool_->append(std::bind(&WebServer::web_read, this, client));
+    assert(client);
+    threadpool_->append(std::bind(&WebServer::web_read, this, client));
 }
 
 void WebServer::deal_write(HttpConn* client) {
     printf("something to write\n");
-    //threadpool_->append(std::bind(&WebServer::web_write, this, client));
+    assert(client);
+    threadpool_->append(std::bind(&WebServer::web_write, this, client));
+}
+
+void WebServer::web_read(HttpConn* client) {
+    printf("我在read %d\n", client->num);
+    int read_err_no = -1;
+    auto ret = client->read(&read_err_no);
+    if (ret <= 0 && read_err_no != EAGAIN) {
+        close_conn(client);
+        return;
+    }
+
+    web_process(client);
+}
+
+void WebServer::web_process(HttpConn* client) {
+    if (client->process()) {
+        epoller_->mod_fd(client->get_fd(), EPOLLOUT);
+    } else{
+        epoller_->mod_fd(client->get_fd(), EPOLLIN);
+    }
+}
+
+void WebServer::web_write(HttpConn* client) {
+    printf("我在write %d\n", client->num);
 }
 
 void WebServer::add_client(int fd, sockaddr_in addr) {
@@ -134,4 +162,10 @@ bool WebServer::init_socket() {
 int WebServer::set_fd_non_block(int fd) {
     assert(fd > 0);
     return fcntl(fd, F_SETFL, fcntl(fd, F_GETFD, 0) | O_NONBLOCK);
+}
+
+void WebServer::close_conn(HttpConn* client) {
+    assert(client);
+    epoller_->remove_fd(client->get_fd());
+    client->close_conn();
 }

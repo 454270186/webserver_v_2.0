@@ -76,7 +76,7 @@ void Buffer::print_buf() {
 }
 
 /* I/O for fd */
-ssize_t Buffer::Read_fd(int fd) {
+ssize_t Buffer::Read_fd(int fd, int* err_no) {
     char buf[65535];
     const size_t writable = writable_size();
     struct iovec read_ioc[2];
@@ -88,6 +88,7 @@ ssize_t Buffer::Read_fd(int fd) {
     ssize_t len = readv(fd, read_ioc, 2);
     if (len < 0) {
         printf("ERROR while readv in Read_fd\n");
+        *err_no = errno;
     } else if (len <= writable) {
         has_writen(len);
     } else if (len > writable) {
@@ -98,12 +99,12 @@ ssize_t Buffer::Read_fd(int fd) {
     return len;
 }
 
-ssize_t Buffer::Write_fd(int fd) {
+ssize_t Buffer::Write_fd(int fd, int* err_no) {
     const size_t readable = readable_size();
     
     ssize_t len = write(fd, peek(), readable);
     if (len < 0) {
-        printf("ERROR while write in Write_fd\n");
+        *err_no = errno;
         return len;
     }
 

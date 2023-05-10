@@ -4,6 +4,7 @@
 
 const char* HttpConn::src_dir_;
 atomic<int> HttpConn::user_cnt_;
+bool HttpConn::is_ET_;
 
 HttpConn::HttpConn() {
     fd_ = -1;
@@ -31,4 +32,22 @@ void HttpConn::close_conn() {
         user_cnt_--;
         close(fd_);
     }
+}
+
+ssize_t HttpConn::read(int* err_no) {
+    ssize_t len = -1;
+    do {
+        len = read_buf_.Read_fd(fd_, err_no);
+        if (len <= 0) {
+            break;
+        }
+    } while (is_ET_);
+
+    return len;
+}
+
+ssize_t HttpConn::write(int* err_no) {
+    read_buf_.print_buf();
+
+    return 0;
 }

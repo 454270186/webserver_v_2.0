@@ -27,14 +27,14 @@ private:
     void deal_read(HttpConn* client);
     void deal_write(HttpConn* client);
 
-    void web_process(HttpConn* client) {};
-    void web_read(HttpConn* client) {};
-    void web_write(HttpConn* client) {};
+    void web_process(HttpConn* client);
+    void web_read(HttpConn* client);
+    void web_write(HttpConn* client);
 
-    void close_conn(HttpConn* client) {};
+    void close_conn(HttpConn* client);
 
     int port_{8080};
-    bool is_closed_{false};
+    bool is_closed_{true};
     int listen_fd_{-1};
     char* src_dir_{0};
 
