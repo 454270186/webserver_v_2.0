@@ -38,6 +38,8 @@ public:
 
     bool is_keep_alive();
 
+    // string url() { return url_; }
+    string get_url() { return url_; }
 private:
     PARSE_STATE state_;
 

@@ -51,3 +51,14 @@ ssize_t HttpConn::write(int* err_no) {
 
     return 0;
 }
+
+bool HttpConn::process() {
+    req_.init();
+    if (read_buf_.readable_size() <= 0) {
+        return false;
+    } else if (req_.parse(read_buf_)) {
+        printf("");
+    } else {
+        // 404 not found
+    }
+}

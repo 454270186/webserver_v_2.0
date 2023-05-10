@@ -18,6 +18,8 @@ public:
     size_t pre_size();
 
     void retrieve_all();
+    void retrieve(size_t len);
+    void retrieve_until(const char* end);
 
     void check_for_write(size_t len);
     void has_writen(size_t len); // add write_pos_

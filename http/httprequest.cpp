@@ -41,8 +41,13 @@ bool HttpRequest::parse(Buffer& buffer) {
             default:
                 break;
         }
+        if (new_line_end == buffer.begin_write()) {
+            break;
+        }
+        buffer.retrieve_until(new_line_end + 2);
     }
-
+    printf("[%s] [%s] [%s]\n", method_, url_, version_);
+    return true;
 }
 
 bool HttpRequest::parse_req_line(const string& line) {

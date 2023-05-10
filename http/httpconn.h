@@ -21,7 +21,7 @@ public:
     ssize_t read(int* err_no);
     ssize_t write(int* err_no);
     
-    bool process() {return true; };
+    bool process();
 
     int get_fd() { return fd_; }
 

@@ -122,3 +122,17 @@ void Buffer::retrieve_all() {
     read_pos_ = 0;
     write_pos_ = 0;
 }
+
+/// @brief retrieve bytes with length len
+/// @param len 
+void Buffer::retrieve(size_t len) {
+    assert(len <= readable_size());
+    read_pos_ += len;
+}
+
+/// @brief retrieve all bytes until meets 'end'
+/// @param end 
+void Buffer::retrieve_until(const char* end) {
+    assert(end >= peek());
+    retrieve(end - peek());
+}
