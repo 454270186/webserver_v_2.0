@@ -26,14 +26,25 @@ public:
         CLOSED_CONNECTION,
     };
 
-    HttpRequest();
+    HttpRequest() { init(); }
     ~HttpRequest() = default;
 
+    void init();
+
+    bool parse(Buffer& buffer);
+    bool parse_req_line(const string& line);
+    void parse_header(const string& line);
+    void parse_body(const string& line);
+
+    bool is_keep_alive();
 
 private:
+    PARSE_STATE state_;
+
     string method_;
     string url_;
     string version_;
+    string body_;
     
     unordered_map<string, string> headers_{};
 };  

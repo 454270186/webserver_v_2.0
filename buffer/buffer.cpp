@@ -35,6 +35,10 @@ const char* Buffer::peek() {
     return begin_ptr_() + read_pos_;
 }
 
+const char* Buffer::begin_write() {
+    return begin_ptr_() + write_pos_;
+}
+
 void Buffer::append(const char* str, size_t len) {
     assert(str);
     check_for_write(len);

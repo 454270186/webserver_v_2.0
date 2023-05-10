@@ -22,6 +22,7 @@ public:
     void check_for_write(size_t len);
     void has_writen(size_t len); // add write_pos_
     const char* peek(); // return the string started at first unread char
+    const char* begin_write(); // return the strinf starten at first unwrite char
 
     void append(const string& str); // accept for c++ string
     void append(const char* str, size_t len); // accept for c string
