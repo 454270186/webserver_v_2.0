@@ -24,6 +24,9 @@ public:
     bool process();
 
     int get_fd() { return fd_; }
+    sockaddr_in get_addr() { return addr_; }
+
+    int to_write_bytes() { return ioc_[0].iov_len + ioc_[1].iov_len; }
 
     static const char* src_dir_;
     static atomic<int> user_cnt_;
@@ -36,7 +39,7 @@ private:
 
     bool is_closed_{true};
 
-    int iov_cnt_;
+    int iov_cnt_{2};
     iovec ioc_[2];
 
     Buffer read_buf_;
