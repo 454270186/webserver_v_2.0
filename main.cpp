@@ -8,7 +8,7 @@
 using namespace std;
 
 int main() {
-    int thread_nums = 10;
+    int thread_nums = 6;
     WebServer server(thread_nums);
     server.run();
 }

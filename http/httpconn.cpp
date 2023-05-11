@@ -76,6 +76,8 @@ ssize_t HttpConn::write(int* err_no) {
     return len;
 }
 
+/// @brief process the http request
+/// @return true if this htto connection is ready for write
 bool HttpConn::process() {
     req_.init();
     if (read_buf_.readable_size() <= 0) {

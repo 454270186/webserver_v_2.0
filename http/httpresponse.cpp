@@ -18,7 +18,7 @@ const unordered_map<string, string> HttpResponse::FILE_TYPE = {
     { ".js",    "text/javascript "},
 };
 
-void HttpResponse::init(const string& src_dir, const string& src_file, bool is_keep_alive = false, int code = -1) {
+void HttpResponse::init(const string& src_dir, const string& src_file, bool is_keep_alive, int code) {
     if (m_file_) {
         unmap_file();
     }

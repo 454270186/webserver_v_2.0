@@ -70,19 +70,16 @@ void WebServer::deal_listen() {
 }
 
 void WebServer::deal_read(HttpConn* client) {
-    printf("something to read\n");
     assert(client);
     threadpool_->append(std::bind(&WebServer::web_read, this, client));
 }
 
 void WebServer::deal_write(HttpConn* client) {
-    printf("something to write\n");
     assert(client);
     threadpool_->append(std::bind(&WebServer::web_write, this, client));
 }
 
 void WebServer::web_read(HttpConn* client) {
-    printf("我在read %d\n", client->num);
     int read_err_no = -1;
     auto ret = client->read(&read_err_no);
     if (ret <= 0 && read_err_no != EAGAIN) {
@@ -102,7 +99,24 @@ void WebServer::web_process(HttpConn* client) {
 }
 
 void WebServer::web_write(HttpConn* client) {
-    printf("我在write %d\n", client->num);
+    int write_err_no = -1;
+    auto ret = client->write(&write_err_no);
+    if (ret < 0) {
+        if (write_err_no == EAGAIN) {
+            epoller_->mod_fd(client->get_fd(), conn_event_ | EPOLLOUT);
+            return;
+        }
+    }
+
+    if (client->to_write_bytes() == 0) {
+        // finish write
+        if (client->is_keep_alive()) {
+            web_process(client);
+            return;
+        }
+    }
+
+    close_conn(client);
 }
 
 void WebServer::add_client(int fd, sockaddr_in addr) {

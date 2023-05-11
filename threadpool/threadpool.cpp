@@ -45,7 +45,6 @@ void Threadpool::worker() {
 }
 
 bool Threadpool::append(std::function<void()> task) {
-    printf("add a new task\n");
     if (m_is_close.load()) {
         return false;
     }

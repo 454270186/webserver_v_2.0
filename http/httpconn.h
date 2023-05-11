@@ -22,6 +22,7 @@ public:
     ssize_t write(int* err_no);
     
     bool process();
+    bool is_keep_alive() { return req_.is_keep_alive(); }
 
     int get_fd() { return fd_; }
     sockaddr_in get_addr() { return addr_; }

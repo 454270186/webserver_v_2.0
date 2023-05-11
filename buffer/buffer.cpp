@@ -91,7 +91,6 @@ ssize_t Buffer::Read_fd(int fd, int* err_no) {
 
     ssize_t len = readv(fd, read_ioc, 2);
     if (len < 0) {
-        printf("ERROR while readv in Read_fd\n");
         *err_no = errno;
     } else if (len <= writable) {
         has_writen(len);
