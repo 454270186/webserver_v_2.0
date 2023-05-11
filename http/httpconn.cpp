@@ -3,7 +3,7 @@
 #include "httpconn.h"
 
 const char* HttpConn::src_dir_;
-atomic<int> HttpConn::user_cnt_;
+atomic<int> HttpConn::user_cnt_{0};
 bool HttpConn::is_ET_;
 
 HttpConn::HttpConn() {
@@ -22,7 +22,7 @@ void HttpConn::init(int fd, sockaddr_in addr) {
     read_buf_.retrieve_all();
     write_buf_.retrieve_all();
     is_closed_ = false;
-    user_cnt_++;
+    user_cnt_.fetch_add(1);
     printf("current user cnt: %d\n", user_cnt_.load());
 }
 
@@ -30,7 +30,7 @@ void HttpConn::close_conn() {
     res_.unmap_file();
     if (!is_closed_) {
         is_closed_ = true;
-        user_cnt_--;
+        user_cnt_.fetch_sub(1);
         close(fd_);
     }
 }
@@ -59,16 +59,16 @@ ssize_t HttpConn::write(int* err_no) {
             // 缓冲区数据已写完
             break;
         } else if (static_cast<size_t>(len) > ioc_[0].iov_len) {
-            ioc_[1].iov_base = (uint8_t*)ioc_[1].iov_base + (static_cast<size_t>(len) - ioc_[0].iov_len);
-            ioc_[1].iov_len -= static_cast<size_t>(len) - ioc_[0].iov_len;
+            ioc_[1].iov_base = (uint8_t*)ioc_[1].iov_base + (len - ioc_[0].iov_len);
+            ioc_[1].iov_len -= len - ioc_[0].iov_len;
             
             if (ioc_[0].iov_len) {
                 write_buf_.retrieve_all();
                 ioc_[0].iov_len = 0;
             }
         } else {
-            ioc_[0].iov_base = (uint8_t*)ioc_[0].iov_base + static_cast<size_t>(len);
-            ioc_[0].iov_len -= static_cast<size_t>(len);
+            ioc_[0].iov_base = (uint8_t*)ioc_[0].iov_base + len;
+            ioc_[0].iov_len -= len;
             write_buf_.retrieve(len);
         }
     } while (is_ET_ || to_write_bytes() > 10240);
@@ -95,10 +95,12 @@ bool HttpConn::process() {
     // 分散写：响应头 + 文件
     ioc_[0].iov_base = const_cast<char*>(write_buf_.peek());
     ioc_[0].iov_len = write_buf_.readable_size();
+    iov_cnt_ = 1;
 
     if (res_.file_len() > 0 && res_.file()) {
         ioc_[1].iov_base = res_.file();
         ioc_[1].iov_len = res_.file_len();
+        iov_cnt_ = 2;
     }
 
     printf("response length: %d\n", to_write_bytes());

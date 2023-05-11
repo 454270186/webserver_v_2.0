@@ -40,7 +40,7 @@ private:
 
     bool is_closed_{true};
 
-    int iov_cnt_{2};
+    int iov_cnt_;
     iovec ioc_[2];
 
     Buffer read_buf_;

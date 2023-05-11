@@ -6,14 +6,16 @@
 #include "webserver.h"
 #include "threadpool.h"
 
+const int WebServer::MAX_FD = 65535;
+
 WebServer::WebServer(int thread_num) : threadpool_(new Threadpool(thread_num)), epoller_(new Epoll()) {
-    listen_event_ = EPOLLIN;
+    listen_event_ = EPOLLIN | EPOLLET;
     conn_event_ = EPOLLONESHOT | EPOLLRDHUP | EPOLLET;
     src_dir_ = getcwd(NULL, 256);
     strncat(src_dir_, "/static/", 20);
 
     HttpConn::src_dir_ = src_dir_;
-    HttpConn::user_cnt_ = 0;
+    HttpConn::user_cnt_.store(0);
     HttpConn::is_ET_ = true;
     if (!init_socket()) {
         is_closed_ = true;
@@ -24,6 +26,7 @@ WebServer::WebServer(int thread_num) : threadpool_(new Threadpool(thread_num)), 
 WebServer::~WebServer() {
     close(listen_fd_);
     is_closed_ = true;
+    free(src_dir_);
 }
 
 void WebServer::run() {
@@ -37,7 +40,7 @@ void WebServer::run() {
         int ev_cnt = epoller_->wait(-1);
         if (ev_cnt < 0) {
             printf("ERROR while epoll wait\n");
-            exit(-1);
+            continue;
         }
 
         for (int i = 0; i < ev_cnt; i++) {
@@ -65,8 +68,16 @@ void WebServer::run() {
 void WebServer::deal_listen() {
     sockaddr_in client_addr;
     socklen_t client_len = sizeof(client_addr);
-    int cfd = accept(listen_fd_, (sockaddr*)&client_addr, &client_len);
-    add_client(cfd, client_addr);
+    do {
+        int cfd = accept(listen_fd_, (sockaddr*)&client_addr, &client_len);
+        if (cfd <= 0) {
+            return;
+        } else if (HttpConn::user_cnt_.load() >= MAX_FD) {
+            printf("Server busy\n");
+            return;
+        }
+        add_client(cfd, client_addr);
+    } while (listen_event_ & EPOLLET);
 }
 
 void WebServer::deal_read(HttpConn* client) {
@@ -92,26 +103,24 @@ void WebServer::web_read(HttpConn* client) {
 
 void WebServer::web_process(HttpConn* client) {
     if (client->process()) {
-        epoller_->mod_fd(client->get_fd(), EPOLLOUT);
+        epoller_->mod_fd(client->get_fd(), conn_event_ | EPOLLOUT); // 如果只有EPOLLOUT或者EPOLLIN就会错
     } else{
-        epoller_->mod_fd(client->get_fd(), EPOLLIN);
+        epoller_->mod_fd(client->get_fd(), conn_event_ | EPOLLIN);
     }
 }
 
 void WebServer::web_write(HttpConn* client) {
     int write_err_no = -1;
     auto ret = client->write(&write_err_no);
-    if (ret < 0) {
-        if (write_err_no == EAGAIN) {
-            epoller_->mod_fd(client->get_fd(), conn_event_ | EPOLLOUT);
-            return;
-        }
-    }
-
     if (client->to_write_bytes() == 0) {
         // finish write
         if (client->is_keep_alive()) {
             web_process(client);
+            return;
+        }
+    } else if (ret < 0) {
+        if (write_err_no == EAGAIN) {
+            epoller_->mod_fd(client->get_fd(), conn_event_ | EPOLLOUT);
             return;
         }
     }

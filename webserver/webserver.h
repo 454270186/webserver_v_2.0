@@ -17,6 +17,7 @@ public:
     void run(); // start the server on default port
     void run(int port);
 
+    static const int MAX_FD;
 private:
     bool init_socket();
     int set_fd_non_block(int fd);
