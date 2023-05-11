@@ -26,7 +26,7 @@ public:
 
 private:
     // make response
-    void add_status(Buffer& buffer);
+    void add_status_line(Buffer& buffer);
     void add_header(Buffer& buffer);
     void add_content(Buffer& buffer);
 
