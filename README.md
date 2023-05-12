@@ -9,7 +9,7 @@ Based on more mordern C++
 5. 使用C++11 std::atomic，避免data race
 
 ### 压力测试
-使用webbench测试，QPS可达接近10000
+使用webbench测试，QPS接近6000
 ![benchtest](./benchtest.png)
 
 ### TODO
