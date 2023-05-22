@@ -7,6 +7,7 @@ include_directories(
     ./http
     ./threadpool
     ./webserver
+    ./timer
 )
 
 # Add source file
@@ -15,6 +16,7 @@ file(GLOB SOURCES
     "./http/*.cpp"
     "./threadpool/*.cpp"
     "./webserver/*.cpp"
+    "./timer/*.cpp"
 )
 
 # Add excutable file
